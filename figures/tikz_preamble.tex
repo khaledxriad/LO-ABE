@@ -1,0 +1,24 @@
+% LaTeX preamble needed by the pgfplots figures in figures/tikz/*.tikz.
+% Copy these lines into the preamble of your document (packages: tikz, pgfplots >= 1.16).
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepgfplotslibrary{statistics}
+\pgfplotsset{compat=1.16}
+% text inside figures is smaller than the 10 pt body text
+\newcommand{\figtiny}{\fontsize{6}{7}\selectfont}
+\newcommand{\figsmall}{\fontsize{6.5}{8}\selectfont}
+% colour-blind-safe palette shared by every figure (Okabe and Ito)
+\definecolor{loBlue}{HTML}{0072B2}
+\definecolor{loOrange}{HTML}{E69F00}
+\definecolor{loRed}{HTML}{D55E00}
+\definecolor{loGreen}{HTML}{009E73}
+\definecolor{loPink}{HTML}{CC79A7}
+\definecolor{loSky}{HTML}{56B4E9}
+\pgfplotsset{lochart/.style={width=0.82\linewidth, height=5.0cm, grid=major, grid style={dotted,gray!50},
+  tick label style={font=\figtiny}, label style={font=\figsmall},
+  legend style={font=\figtiny, at={(0.5,-0.27)}, anchor=north, legend columns=-1, draw=none,
+    /tikz/every even column/.append style={column sep=0.25cm}},
+  every axis plot/.append style={line width=0.7pt, mark size=1.4pt}}}
+% only needed by the protocol-phase diagram (figures/diagrams/fig_protocol_phases.tikz)
+\newcommand{\AlgRef}[1]{\csname algnum#1\endcsname}
+\def\algnumsetup{1}\def\algnumkeygen{2}\def\algnumenc{3}\def\algnumtrans{4}\def\algnumdec{5}
