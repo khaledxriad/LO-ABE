@@ -1,0 +1,10 @@
+\begin{tikzpicture}
+\begin{axis}[lochart, ymode=log, xmode=log, log basis x=2, xtick={4,8,16,32}, xticklabels={4,8,16,32}, minor x tick num=0, xlabel={Number of attribute positions $N$}, ylabel={Device operations (MAC equivalents)}]
+\addplot+[color=loBlue, mark=square*, mark options={solid,fill=loBlue}, ] coordinates {(4,4256) (8,4256) (16,4256) (32,4256)};
+\addlegendentry{LO-ABE (outsourced)}
+\addplot+[color=loOrange, mark=*, mark options={solid,fill=loOrange}, ] coordinates {(4,2.899e+04) (8,4.538e+04) (16,7.814e+04) (32,1.437e+05)};
+\addlegendentry{LO-ABE decrypted locally}
+\addplot+[color=loRed, mark=triangle*, mark options={solid,fill=loRed}, dashed] coordinates {(4,4.979e+04) (8,9.958e+04) (16,1.992e+05) (32,3.983e+05)};
+\addlegendentry{Naive layout (modeled)}
+\end{axis}
+\end{tikzpicture}
