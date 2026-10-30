@@ -1,7 +1,7 @@
-"""Shared data preparation for the figure scripts (matplotlib and pgfplots).
+"""Shared data preparation for the figure scripts.
 
 Every number plotted in the paper is computed here from data/results.json, so
-the PDF figures, the pgfplots figures and the LaTeX tables can never disagree.
+the PDF figures and the LaTeX tables can never disagree.
 """
 import json
 import os

@@ -172,7 +172,7 @@ def fig_heat(D, th):
         for i in range(M_.shape[0]):
             for j in range(M_.shape[1]):
                 ax.text(j, i, fmt.format(M_[i, j]), ha="center", va="center", fontsize=5.2)
-        # white cell borders, like the pgfplots version
+        # white cell borders
         for k in range(len(fr) + 1):
             ax.axvline(k - 0.5, color="white", lw=0.4); ax.axhline(k - 0.5, color="white", lw=0.4)
         cb = fig.colorbar(im, ax=ax, fraction=0.05, pad=0.03)
