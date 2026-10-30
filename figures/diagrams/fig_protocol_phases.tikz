@@ -1,0 +1,18 @@
+\begin{tikzpicture}[>=stealth, font=\fontsize{7.5}{9}\selectfont,
+  stp/.style={rectangle, rounded corners, draw, thick, minimum width=2.2cm, minimum height=1.1cm, align=center},
+  ta/.style={stp, fill=blue!7}, do/.style={stp, fill=blue!7}, ts/.style={stp, fill=orange!12}, mu/.style={stp, fill=green!10},
+  note/.style={font=\fontsize{6.5}{8}\selectfont, align=center, text width=2.3cm}]
+  \node[ta] (S) at (0,0) {\textbf{Setup}\\(Alg.~\AlgRef{setup})};
+  \node[ta] (K) at (2.7,0) {\textbf{KeyGen}\\(Alg.~\AlgRef{keygen})};
+  \node[do] (E) at (5.4,0) {\textbf{Encrypt}\\(Alg.~\AlgRef{enc})};
+  \node[ts] (T) at (8.1,0) {\textbf{Transform}\\(Alg.~\AlgRef{trans})};
+  \node[mu] (D) at (10.8,0) {\textbf{Decrypt}\\(Alg.~\AlgRef{dec})};
+  \draw[->, thick] (S) -- (K); \draw[->, thick] (K) -- (E); \draw[->, thick] (E) -- (T); \draw[->, thick] (T) -- (D);
+  \node[note] at (0,-1.5) {TA\\once};
+  \node[note] at (2.7,-1.5) {TA + user\\once per user};
+  \node[note] at (5.4,-1.5) {DO\\$O(NMm)$ bit-adds};
+  \node[note] at (8.1,-1.5) {TS\\$M+Nm$ MACs};
+  \node[note] at (10.8,-1.5) {User\\$m_0$ additions};
+  \node[note] at (2.7,1.5) {$\mathbf{t}\in\{0,1\}^{m_0}$ stays\\on the device};
+  \node[note] at (8.1,1.5) {returns $y_T\in\mathbb{Z}_q$};
+\end{tikzpicture}

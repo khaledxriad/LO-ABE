@@ -1,0 +1,20 @@
+\begin{tikzpicture}[>=stealth, font=\fontsize{7.5}{9}\selectfont,
+  ent/.style={rectangle, rounded corners, draw, thick, minimum width=2.6cm, minimum height=1.0cm, align=center, fill=blue!6},
+  cld/.style={rectangle, rounded corners, draw, thick, minimum width=2.6cm, minimum height=1.0cm, align=center, fill=orange!10},
+  usr/.style={rectangle, rounded corners, draw, thick, minimum width=2.6cm, minimum height=1.0cm, align=center, fill=green!8},
+  lab/.style={font=\fontsize{6.5}{8}\selectfont, fill=white, inner sep=1.2pt}]
+  \node[ent] (TA) at (0,4.3) {Trusted Authority\\(TA)};
+  \node[ent] (DO) at (0,0) {Data Owner\\(DO)};
+  \node[cld] (CS) at (5.7,0) {Cloud Storage\\(CS)};
+  \node[cld] (TS) at (5.7,4.3) {Transformation\\Server (TS)};
+  \node[usr] (MU) at (11.4,2.15) {Mobile User\\(MU)};
+  \draw[->, thick] (TA) -- node[lab, midway] {(1) PK} (DO);
+  \draw[->, thick] (DO) -- node[lab, midway] {(2) $\mathrm{CT}_{w}$ (policy $w$)} (CS);
+  \draw[->, thick] (MU.north) -- (11.4,6.3) -- node[lab, midway] {(3) $x,\ \mathbf{h}=\mathbf{A}_0\mathbf{t}$} (TA.north west |- 0,6.3) -- (TA.north west);
+  \draw[->, thick, dashed] (TA.north east) -- (TA.north east |- 0,5.5) -- node[lab, midway] {(4) $\mathrm{TK}_x$} (MU.north east |- 0,5.5) -- (MU.north east);
+  \draw[->, thick] (MU.north west) -- node[lab, pos=0.5, sloped, above] {(5) $\mathrm{TK}_x$ (once)} (TS.east);
+  \draw[->, thick] (CS) -- node[lab, midway] {(6) $\mathrm{CT}_w$} (TS);
+  \draw[->, thick] (TS.south east) -- node[lab, pos=0.5, sloped, below] {(7) $y_T\in\mathbb{Z}_q$} (MU.west);
+  \draw[->, thick] (CS.east) -- node[lab, pos=0.5, sloped, below] {(8) $c_0,\mathbf{c}_s$} (MU.south west);
+  \node[font=\fontsize{6.5}{8}\selectfont, align=center, text width=3.4cm] at (11.4,-0.5) {Keeps $\mathbf{t}$ (RK) on the device; computes $\mu$ from $c_0-y_T+\mathbf{t}^{\top}\mathbf{c}_s$};
+\end{tikzpicture}
