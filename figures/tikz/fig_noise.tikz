@@ -1,7 +1,0 @@
-\begin{tikzpicture}
-\begin{axis}[lochart, ybar interval, xlabel={Decryption noise as a percentage of the threshold $q/4$ (decryption fails at 100\%)}, ylabel={Number of trials}, ymin=0, ymax=31.86, xmin=0, xmax=6.5]
-\addplot+[fill=loBlue, draw=white, line width=0.3pt] coordinates {(0,27) (0.4643,20) (0.9286,15) (1.393,18) (1.857,12) (2.321,8) (2.786,7) (3.25,6) (3.714,2) (4.179,3) (4.643,1) (5.107,0) (5.571,0) (6.036,1) (6.5,1)};
-\draw[dashed, line width=0.5pt] (axis cs:1.353,0) -- (axis cs:1.353,28.35);
-\node[anchor=south west, font=\fontsize{5.5}{6}\selectfont, inner sep=1pt] at (axis cs:1.353,27) {median 1.4\%};
-\end{axis}
-\end{tikzpicture}
