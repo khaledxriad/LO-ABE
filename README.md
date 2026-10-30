@@ -22,10 +22,9 @@ benchmarks/run_benchmarks.py benchmark driver; writes raw samples to data/result
 data/results.json            raw measurements behind every table and figure
 figures/common.py            shared data preparation (box statistics, histograms, heat-map matrices)
 figures/make_figures.py      figures as PDF/PNG (matplotlib); themes, formats and DPI are options
-figures/make_pgfplots.py     the same figures as pgfplots/TikZ code
 figures/diagrams/*.tikz      TikZ sources of the system-model and protocol-phase diagrams
 figures/build_diagrams.py    compiles the two diagrams to PDF (needs pdflatex + standalone)
-figures/tikz_preamble.tex   packages, colors and styles needed by figures/tikz/*.tikz
+figures/tikz_preamble.tex    preamble lines needed to \input the diagrams in a LaTeX document
 tests/test_data.py           consistency checks for data/results.json and the figure numbers
 ```
 
@@ -48,12 +47,11 @@ python benchmarks/run_benchmarks.py --out data/results.json
 ```bash
 python figures/make_figures.py                 # figures/pdf/*.pdf and *.png (matplotlib)
 python figures/make_figures.py --theme gray    # other colour themes: default, gray, warm
-python figures/make_pgfplots.py                # figures/tikz/*.tikz (pgfplots code)
 python figures/build_diagrams.py               # figures/pdf/fig_system_model.pdf, fig_protocol_phases.pdf
 python tests/test_data.py                      # checks that the data and derived numbers are consistent
 ```
 
-The `.tikz` files hold a bare `tikzpicture`. Paste one into a `figure` environment, or `\input` it, after
+The diagram files in `figures/diagrams/` hold a bare `tikzpicture`. Paste one into a `figure` environment, or `\input` it, after
 adding the lines of `figures/tikz_preamble.tex` to your document preamble. To use the PDF versions instead,
 include `figures/pdf/*.pdf` with `\includegraphics`.
 

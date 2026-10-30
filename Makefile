@@ -10,10 +10,9 @@ test:            ## fast correctness tests (small lattice dimension)
 data:            ## re-run the benchmarks (about 10 minutes); writes data/results.json
 	$(PY) benchmarks/run_benchmarks.py --out data/results.json
 
-figures:         ## PDF/PNG figures (matplotlib), pgfplots sources and the two TikZ diagrams
+figures:         ## PDF/PNG figures (matplotlib) and the two TikZ diagrams
 	$(PY) figures/make_figures.py
-	$(PY) figures/make_pgfplots.py
 	$(PY) figures/build_diagrams.py
 
 clean:
-	rm -rf figures/pdf figures/tikz
+	rm -rf figures/pdf
