@@ -9,23 +9,23 @@ secret, a cloud server turns the ciphertext into a single element of `Z_q`, and 
 one binary inner product. The device cost therefore does not grow with the policy size.
 
 > **Status.** This is a measurement prototype, not a library. The preimage sampler is a gadget-based
-> perturbed sampler, the benchmark parameters (`n = 128`, `q = 2^32`) satisfy the dimension conditions of the
-> proof but not its full smoothing margins, no lattice-estimator run backs a bit-security claim, and the
-> payload is one bit. Do not use it to protect real data. Each limitation is discussed in the accompanying article.
+> perturbed sampler whose Gaussian perturbation is not spherical, so the security argument for the exact
+> sampler does not apply to it. The benchmark parameters (`n = 128`, `q = 2^32`) are not secure and do not
+> meet the proof's width and noise conditions beyond small policy sizes. The lattice estimator was not run;
+> the article gives a projected parameter set with an estimate from a core-SVP model, and its costs are
+> computed from the scheme's formulas, not measured. The payload is one bit. Do not use this code to
+> protect real data. Each limitation is discussed in the accompanying article.
 
 ## Repository layout
 
 ```
-src/loabe/scheme.py          Setup, KeyGen, Encrypt, Transform, Decrypt (NumPy), sizes and operation counts
-tests/test_scheme.py         fast correctness tests with a small lattice dimension (n = 16)
-benchmarks/run_benchmarks.py benchmark driver; writes raw samples to data/results.json
-data/results.json            raw measurements behind every table and figure
-figures/common.py            shared data preparation (box statistics, histograms, heat-map matrices)
-figures/make_figures.py      figures as PDF/PNG (matplotlib); themes, formats and DPI are options
-figures/diagrams/*.tikz      TikZ sources of the system-model and protocol-phase diagrams
-figures/build_diagrams.py    compiles the two diagrams to PDF (needs pdflatex + standalone)
-figures/tikz_preamble.tex    preamble lines needed to \input the diagrams in a LaTeX document
-tests/test_data.py           consistency checks for data/results.json and the figure numbers
+src/loabe/scheme.py            Setup, KeyGen, Encrypt, Transform, Decrypt (NumPy), sizes and operation counts
+tests/test_scheme.py           fast correctness tests with a small lattice dimension (n = 16)
+tests/test_data.py             consistency checks for data/results.json and the numbers behind the figures
+benchmarks/run_benchmarks.py   benchmark driver; writes raw samples to data/results.json
+benchmarks/device_microbench.c native C timing of the device step and of local decryption
+data/results.json              raw measurements behind every table and figure
+figures/pdf/                   all figures of the article as PDF (data figures also as PNG)
 ```
 
 ## Quick start
@@ -42,31 +42,40 @@ Full benchmark (about 10 minutes on a 2-vCPU server; needs about 1 GB of memory)
 python benchmarks/run_benchmarks.py --out data/results.json
 ```
 
-## Reproducing the figures
+## Figures
+
+All figures of the article are provided as PDF files in `figures/pdf/`, and the data figures also as PNG.
+They are drawn from `data/results.json`. The consistency of that file and of the numbers behind the figures
+can be checked with:
 
 ```bash
-python figures/make_figures.py                 # figures/pdf/*.pdf and *.png (matplotlib)
-python figures/make_figures.py --theme gray    # other colour themes: default, gray, warm
-python figures/build_diagrams.py               # figures/pdf/fig_system_model.pdf, fig_protocol_phases.pdf
-python tests/test_data.py                      # checks that the data and derived numbers are consistent
+python tests/test_data.py
 ```
 
-The diagram files in `figures/diagrams/` hold a bare `tikzpicture`. Paste one into a `figure` environment, or `\input` it, after
-adding the lines of `figures/tikz_preamble.tex` to your document preamble. To use the PDF versions instead,
-include `figures/pdf/*.pdf` with `\includegraphics`.
+## Native microbenchmark
+
+```bash
+gcc -O2 -o device_microbench benchmarks/device_microbench.c
+./device_microbench 32 128 32 80 16 200        # word bits, n, log2 q, lambda, N, repetitions
+```
+
+It prints one JSON line with the median and quartiles, in nanoseconds, of the device step (additions only)
+and of local decryption (multiply-accumulates plus the device step).
 
 ## Experiments
 
 | Experiment | What it measures | Figure |
 |---|---|---|
-| correctness | 120 randomized end-to-end trials at `N = 8`; decryption noise as a percentage of `q/4` | histogram |
-| timing | KeyGen, Encrypt (7 runs), Transform (200), device step (1000), local decryption (200) for `N = 4..32` | line plot with error bars, box plot |
-| sizes and operations | exact byte and MAC counts (machine independent) | stacked bars, line plot, grouped bars |
+| correctness | 200 randomized end-to-end trials at `N = 8` and 60 at `N = 32`; decryption noise as a percentage of `q/4` | histogram |
+| timing | KeyGen and Encrypt (15 runs), Transform (450), device step (2250), local decryption (450) for `N = 4..32`; medians and interquartile ranges | line plot, box plot |
+| sizes and operations | exact byte counts and operation counts (additions and multiply-accumulates reported separately) | stacked bars, line plot, grouped bars |
 | wildcard grid | encryption time and ciphertext size over `N` x wildcard fraction | heat maps |
+| native microbenchmark | device step and local decryption in C, with and without vectorization | table in the article |
 
-The "naive layout" in the figures is a **model** of an attribute-by-attribute lattice CP-ABE in the style of
-Agrawal et al. and Zhang and Zhang (every component a full `(M + m)`-vector). It is not a re-implementation of
-those schemes.
+The only baseline is the local-decryption variant of LO-ABE, implemented here and measured at identical
+parameters. No published scheme is re-implemented. Python timings include interpreter overhead and are used
+for growth trends; the conclusions rest on operation counts, bytes and the C timings. No ARM device or
+energy measurements are included.
 
 ## Citation
 

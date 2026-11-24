@@ -1,7 +1,7 @@
 # Convenience targets. Everything is also available as plain Python commands.
 PY ?= python3
 
-.PHONY: test data figures clean
+.PHONY: test data microbench clean
 
 test:            ## fast correctness tests (small lattice dimension)
 	$(PY) tests/test_scheme.py
@@ -10,9 +10,6 @@ test:            ## fast correctness tests (small lattice dimension)
 data:            ## re-run the benchmarks (about 10 minutes); writes data/results.json
 	$(PY) benchmarks/run_benchmarks.py --out data/results.json
 
-figures:         ## PDF/PNG figures (matplotlib) and the two TikZ diagrams
-	$(PY) figures/make_figures.py
-	$(PY) figures/build_diagrams.py
-
-clean:
-	rm -rf figures/pdf
+microbench:      ## native C timing of the device step and local decryption
+	gcc -O2 -o device_microbench benchmarks/device_microbench.c
+	./device_microbench 32 128 32 80 16 200

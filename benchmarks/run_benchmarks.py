@@ -6,8 +6,7 @@ the paper can be regenerated from one file:
     python benchmarks/run_benchmarks.py --out data/results.json
 
 Experiments
-  correct   : randomized end-to-end trials at N = 8 (noise margin per trial)
-  unauth    : decryption attempts with a key that does not satisfy the policy
+  correct   : randomized end-to-end trials at N = 8 and N = 32 (noise margin per trial)
   timing    : repeated timings of every algorithm for N in {4, 8, 16, 32}
   grid      : encryption time and ciphertext size over N x wildcard fraction
 """
@@ -39,13 +38,13 @@ def timed(f, reps, warmup=1):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="data/results.json")
-    ap.add_argument("--trials", type=int, default=120)
-    ap.add_argument("--unauth", type=int, default=20)
+    ap.add_argument("--trials", type=int, default=200)
+    ap.add_argument("--trials32", type=int, default=60)
     ap.add_argument("--quick", action="store_true", help="tiny run for smoke tests")
-    ap.add_argument("--reuse", help="keep the correctness/unauthorized results of an earlier JSON file and redo only timing and grid")
+    ap.add_argument("--reuse", help="keep the correctness results of an earlier JSON file and redo only timing and grid")
     a = ap.parse_args()
     if a.quick:
-        a.trials, a.unauth = 4, 2
+        a.trials, a.trials32 = 4, 2
     Ns = [4, 8, 16, 32] if not a.quick else [4, 8]
     rs = np.random.default_rng(5)
     res = {"params": S.params(),
@@ -54,43 +53,24 @@ def main():
 
     if a.reuse:
         old = json.load(open(a.reuse))
-        for k in ("correct", "unauth"):
-            res[k] = old[k]
+        res["correct"] = old["correct"]
     else:
-        # -------------------------------------------------- correctness + noise
-        N = 8
-        t0 = time.perf_counter()
-        pp = S.setup(N)
-        res["setup_s"] = time.perf_counter() - t0
-        margins, ok = [], 0
-        for _ in range(a.trials):
-            w = [int(v) for v in rs.integers(0, 3, N)]
-            x = [v if v < 2 else int(rs.integers(0, 2)) for v in w]
-            mu = int(rs.integers(0, 2))
-            sk, t = S.keygen(pp, x)
-            ct = S.encrypt(pp, w, mu)
-            got, rc = S.finish(ct, S.transform(sk, ct), t)
-            ok += int(got == mu)
-            margins.append(S.noise_margin(rc, mu))
-        res["correct"] = {"N": N, "trials": a.trials, "ok": ok, "margins": margins}
-        print("correct", ok, "/", a.trials, "worst", max(margins), flush=True)
-
-        # -------------------------------------------------- unauthorized key
-        bad = 0
-        for _ in range(a.unauth):
-            w = [int(v) for v in rs.integers(0, 2, N)]
-            x = list(w)
-            x[0] ^= 1
-            mu = int(rs.integers(0, 2))
-            sk, t = S.keygen(pp, x)
-            ct = S.encrypt(pp, w, mu)
-            tk2 = dict(sk)
-            tk2["x"] = list(w)   # best honest-looking attempt: use the components of the policy bits
-            got, _ = S.finish(ct, S.transform(tk2, ct), t)
-            bad += int(got == mu)
-        res["unauth"] = {"trials": a.unauth, "recovered": bad}
-        print("unauth", bad, "/", a.unauth, flush=True)
-
+        # -------------------------------------------------- correctness + noise (N = 8 and N = 32)
+        res["correct"] = {}
+        for N, trials in ((8, a.trials), (32, a.trials32)):
+            pp = S.setup(N)
+            margins, ok = [], 0
+            for _ in range(trials):
+                w = [int(v) for v in rs.integers(0, 3, N)]
+                x = [v if v < 2 else int(rs.integers(0, 2)) for v in w]
+                mu = int(rs.integers(0, 2))
+                sk, t = S.keygen(pp, x)
+                ct = S.encrypt(pp, w, mu)
+                got, rc = S.finish(ct, S.transform(sk, ct), t)
+                ok += int(got == mu)
+                margins.append(S.noise_margin(rc, mu))
+            res["correct"][str(N)] = {"N": N, "trials": trials, "ok": ok, "margins": margins}
+            print("correct N=%d" % N, ok, "/", trials, "worst", max(margins), flush=True)
 
     # -------------------------------------------------- setup time (median of 5, N = 8)
     st, _ = timed(lambda: S.setup(8), 5, warmup=1)
@@ -108,7 +88,7 @@ def main():
         yt = S.transform(sk, ct)
         ctx[N] = dict(pp=pp, w=w, sk=sk, t=t, ct=ct, yt=yt,
                       keygen_s=[], encrypt_s=[], transform_s=[], finish_s=[], local_s=[])
-    ROUNDS = 7 if not a.quick else 2
+    ROUNDS = 15 if not a.quick else 2
     for r in range(ROUNDS):
         for N in Ns:
             c = ctx[N]
@@ -150,11 +130,16 @@ def main():
             z = S.sizes(pp, w)
             cells.append(dict(N=N, frac=fr, pp=pp, w=w, sk=sk, ct=ct, ok=int(got == 1),
                               ctsize=z["ct"], ncomp=z["ncomp"], encrypt_s=[], transform_s=[]))
-    for r in range(5 if not a.quick else 2):
+    for r in range(9 if not a.quick else 2):
         for c in cells:
+            if c["frac"] == 0.0:
+                continue                  # the 0 % column reuses the timing samples above
             (en,), _ = timed(lambda: S.encrypt(c["pp"], c["w"], 1), 1, warmup=0)
             c["encrypt_s"].append(en)
         print("grid pass", r + 1, flush=True)
+    for c in cells:
+        if c["frac"] == 0.0:
+            c["encrypt_s"] = list(ctx[c["N"]]["encrypt_s"])
     for c in cells:
         tr, _ = timed(lambda: S.transform(c["sk"], c["ct"]), 50, warmup=2)
         c["transform_s"] = tr
